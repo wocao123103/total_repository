@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<!-- 作品总展示网页。文件名用 works.html，避免覆盖同仓库里作为「GitHub 试用网页」的 index.html -->
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>作品总展示 · xxy的作品</title>
+  <meta name="description" content="xxy 的作品总展示页：左栏列出各作品入口，右侧先留白。">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23166b59'/%3E%3Ctext x='32' y='43' font-size='32' font-family='sans-serif' font-weight='700' fill='white' text-anchor='middle'%3Ex%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <header class="site-header">
+    <div class="site-logo">
+      <span class="mark" aria-hidden="true">x.</span>
+      <span class="name">xxy的作品</span>
+    </div>
+    <span class="breadcrumb">作品总展示</span>
+    <a class="header-link" href="https://github.com/wocao123103/total_repository" target="_blank"
+      rel="noopener noreferrer">GitHub 仓库 ↗</a>
+  </header>
+
+  <div class="workspace">
+
+    <!-- 左侧目录：只放真的能点开的入口。
+         新增作品就复制一个 <li>，改序号、文字和 href。
+         href 填「简介网页」的 Pages 地址，不要填 github.com/.../blob/...（那是源码页）。 -->
+    <aside class="toc" aria-label="作品目录">
+      <p class="toc-title">作品入口 / WORKS</p>
+      <ul class="toc-list">
+        <li>
+          <a class="toc-link"
+            href="https://wocao123103.github.io/smart_schedule/python%E8%AF%BE%E5%8A%A0%E8%BD%BD%E7%BD%91%E9%A1%B5.html"
+            title="日程助手 · 简介网页" target="_blank" rel="noopener noreferrer">
+            <span class="idx">01</span>
+            <span class="txt">日程助手 · 简介网页</span>
+            <span class="arrow" aria-hidden="true">↗</span>
+          </a>
+        </li>
+        <li>
+          <a class="toc-link"
+            href="https://wocao123103.github.io/ink_recognition-moshi-/index.html"
+            title="墨识 · 文字识别" target="_blank" rel="noopener noreferrer">
+            <span class="idx">02</span>
+            <span class="txt">墨识 · 文字识别</span>
+            <span class="arrow" aria-hidden="true">↗</span>
+          </a>
+        </li>
+        <li>
+          <a class="toc-link"
+            href="https://wocao123103.github.io/ink_recognition-moshi-/tiyanban.html"
+            title="墨识 · 网页体验版" target="_blank" rel="noopener noreferrer">
+            <span class="idx">03</span>
+            <span class="txt">墨识 · 网页体验版</span>
+            <span class="arrow" aria-hidden="true">↗</span>
+          </a>
+        </li>
+      </ul>
+      <p class="toc-hint">更多作品做好后再往这里加。</p>
+    </aside>
+
+    <!-- 右侧：先留白。不放任何「看着能点、其实点不动」的卡片。 -->
+    <main class="reading">
+      <div class="reading-inner">
+        <h1 class="section-title">作品总展示</h1>
+        <div class="section-rule"></div>
+        <p class="lead">左边是入口，右边这片先空着，等有新东西再往里放。</p>
+        <div class="canvas-blank" aria-hidden="true"></div>
+      </div>
+    </main>
+
+  </div>
+
+  <footer class="site-footer">© 2026 xxy的作品</footer>
+
+</body>
+
+</html>
