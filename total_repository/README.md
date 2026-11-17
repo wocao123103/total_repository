@@ -2,22 +2,14 @@
 
 个人作品总入口，纯 HTML / CSS / JS，无构建步骤。Three.js 使用本地文件，离线也能打开。
 
+> 本仓库不设置 `index.html`。GitHub Pages 根地址不会自动进入作品页，请直接打开下面的 `作品总览.html`。
+
 ## 在线入口
-
-GitHub Pages 根地址会进入新版总览：
-
-```text
-https://wocao123103.github.io/total_repository/
-        ↓
-https://wocao123103.github.io/total_repository/作品总览.html
-```
 
 - 新版总览：<https://wocao123103.github.io/total_repository/作品总览.html>
 - 旧版目录：<https://wocao123103.github.io/total_repository/前端html学习网页/作品目录.html>
 - 3D 作品架：<https://wocao123103.github.io/total_repository/三维作品架/作品数据立方.html>
 - GitHub 仓库：<https://github.com/wocao123103/total_repository>
-
-根目录的 `index.html` 只做一件事：跳转到 `作品总览.html`。
 
 ## 作品入口
 
@@ -31,7 +23,6 @@ https://wocao123103.github.io/total_repository/作品总览.html
 
 ```text
 total_repository/
-├─ index.html                         # 根入口：跳转到 作品总览.html
 ├─ 作品总览.html                      # 新版单页总览
 ├─ README.md
 ├─ 素材/
@@ -78,17 +69,17 @@ total_repository/
 3. 打开 **Settings → Pages**；
 4. Source 选择 **Deploy from a branch**；
 5. Branch 选择 `main`，目录选择 **`/ (root)`**；
-6. 访问：
+6. 直接访问：
 
 ```text
-https://wocao123103.github.io/total_repository/
+https://wocao123103.github.io/total_repository/作品总览.html
 ```
 
-会自动跳到 `作品总览.html`。
+> 根地址 `https://wocao123103.github.io/total_repository/` 没有 `index.html`，不会自动进入作品页，这是有意为之。
 
 ## 本地预览
 
-不要直接双击 `index.html`，在项目目录启动本地服务：
+在项目目录启动本地服务：
 
 ```powershell
 python -m http.server 8080
@@ -97,12 +88,13 @@ python -m http.server 8080
 然后访问：
 
 ```text
-http://127.0.0.1:8080/total_repository/
+http://127.0.0.1:8080/total_repository/作品总览.html
 ```
 
 ## 不放入仓库
 
 ```text
+index.html                                  # 不设置根入口
 前端html学习网页/python课加载网页.html      # 总览没有链接
 前端html学习网页/python课加载网页-备份.html # 备份
 前端html学习网页/预览.png                  # 未被引用
