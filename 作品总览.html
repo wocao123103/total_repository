@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>作品总览 · xxy的作品</title>
+  <meta name="description" content="xxy 的作品总览：日程助手、墨识手写识别、Three.js 数据立方。左侧目录 + 右侧作品详情，单文件、无 CDN。">
+  <meta name="theme-color" content="#f4faf7">
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b8b82'/%3E%3Ctext x='32' y='44' font-size='34' font-family='sans-serif' font-weight='700' fill='white' text-anchor='middle'%3Ex%3C/text%3E%3C/svg%3E">
+
+  <!-- ============================================================
+       作品总览 · 单文件页面
+       把 作品目录.html 的「左目录 + 右内容」骨架，和 作品总览.html 的
+       白绿卡片视觉、墨识内容合成一页。
+       CSS / JS 全部内联，不加载任何 CDN；只有两张插图放在 素材/。
+       ============================================================ -->
+  <style>
+    :root {
+      --bg: #f4faf7;
+      --paper: #ffffff;
+      --paper-soft: #f8fcfa;
+      --ink: #1e332e;
+      --ink-soft: #3e5750;
+      --muted: #6d837c;
+      --line: #dfece7;
+      --line-strong: #cfe2db;
+      --teal: #0b8b82;
+      --teal-dark: #076c65;
+      --teal-soft: #e1f5ee;
+      --mint: #d8f2e8;
+      --mint-deep: #bfe9dc;
+      --amber: #a9701b;
+      --amber-soft: #fbf3df;
+      --shadow: 0 22px 60px rgba(23, 80, 66, .09);
+      --shadow-sm: 0 8px 24px rgba(23, 80, 66, .07);
+      --radius: 22px;
+      --radius-sm: 14px;
+      --sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, -apple-system, sans-serif;
+      --mono: "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; scroll-padding-top: 92px; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.75;
+      background:
+        radial-gradient(900px 520px at 8% -10%, rgba(191, 233, 220, .60), transparent 62%),
+        radial-gradient(760px 460px at 96% 2%, rgba(225, 245, 238, .9), transparent 58%),
+        linear-gradient(180deg, #f7fcfa 0%, var(--bg) 38%, #f2f9f6 100%);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    :focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; border-radius: 6px; }
+
+    .page { width: min(1500px, 100%); margin: 0 auto; padding: 0 22px; }
+
+    /* ---------------- 顶栏 ---------------- */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 18px; min-height: 74px; padding: 12px 8px; margin: 0 -8px;
+      background: rgba(247, 252, 250, .88);
+      border-bottom: 1px solid rgba(207, 226, 219, .66);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    }
+
+    .brand { display: flex; align-items: center; gap: 11px; flex: 0 0 auto; }
+    .brand-mark {
+      width: 40px; height: 40px; border-radius: 12px;
+      display: grid; place-items: center;
+      background: var(--teal); color: #fff;
+      font-size: 16px; font-weight: 800;
+      box-shadow: 0 8px 18px rgba(11, 139, 130, .18);
+    }
+    .brand-name { display: flex; flex-direction: column; line-height: 1.15; font-size: 19px; font-weight: 800; letter-spacing: .02em; }
+    .brand-name small { margin-top: 3px; color: var(--muted); font-size: 9px; font-weight: 600; letter-spacing: .2em; }
+
+    .topnav {
+      display: flex; align-items: center; gap: 2px; padding: 4px;
+      border: 1px solid var(--line); border-radius: 999px;
+      background: rgba(255, 255, 255, .7);
+    }
+    .topnav a {
+      padding: 7px 13px; border-radius: 999px;
+      color: var(--ink-soft); font-size: 12.5px; font-weight: 600; white-space: nowrap;
+      transition: background .18s ease, color .18s ease;
+    }
+    .topnav a:hover { color: var(--teal-dark); background: var(--teal-soft); }
+
+    .top-actions { display: flex; align-items: center; gap: 8px; }
+
+    .top-action {
+      padding: 7px 13px; border: 1px solid var(--line); border-radius: 8px;
+      font-size: 12.5px; font-weight: 600; color: var(--ink-soft); white-space: nowrap;
+      transition: color .16s ease, border-color .16s ease, background .16s ease;
+    }
+    .top-action:hover { color: var(--teal-dark); border-color: var(--teal); background: var(--teal-soft); }
+
+    /* 版本切换按钮：和「仓库」区分开，它是站内的另一版，不是外链 */
+    .top-action--ver { color: var(--teal-dark); border-color: rgba(11, 139, 130, .34); background: rgba(225, 245, 238, .66); }
+    .top-action--ver:hover { background: var(--mint); }
+
+    /* ---------------- 左目录 + 右内容 ---------------- */
+    .layout {
+      display: grid;
+      grid-template-columns: 236px minmax(0, 1fr);
+      gap: 38px;
+      align-items: start;
+      padding: 30px 0 60px;
+    }
+
+    .rail { position: sticky; top: 96px; }
+    .rail-title {
+      padding-left: 10px; margin-bottom: 10px;
+      font-size: 11px; font-weight: 700; letter-spacing: .16em; color: var(--muted);
+    }
+    .toc { display: grid; gap: 3px; border-left: 1px solid var(--line); }
+    .toc a {
+      display: block; margin-left: -1px; padding: 7px 10px;
+      border-left: 2px solid transparent;
+      font-size: 13.5px; font-weight: 600; color: var(--ink-soft);
+      transition: color .16s ease, border-color .16s ease, background .16s ease;
+    }
+    .toc a:hover { color: var(--teal-dark); background: rgba(225, 245, 238, .55); }
+    .toc a.active { color: var(--teal-dark); border-left-color: var(--teal); background: var(--teal-soft); }
+
+    .rail-note {
+      margin-top: 20px; padding: 14px;
+      border: 1px solid var(--line); border-radius: var(--radius-sm);
+      background: var(--paper-soft);
+      font-size: 12px; line-height: 1.8; color: var(--muted);
+    }
+    .rail-note b { color: var(--ink-soft); }
+
+    /* 左栏底部的版本切换：新版（本页）↔ 旧版目录 */
+    .rail-ver {
+      margin-top: 10px; padding: 12px 12px 6px;
+      border: 1px solid var(--line); border-radius: var(--radius-sm);
+      background: var(--paper);
+    }
+    .rail-ver p {
+      margin: 0 0 8px; font-size: 10px; font-weight: 700;
+      letter-spacing: .16em; color: var(--muted);
+    }
+    .ver {
+      display: flex; flex-direction: column; gap: 1px;
+      margin-bottom: 6px; padding: 7px 9px; border-radius: 8px;
+      font-size: 12px; font-weight: 650; line-height: 1.5; color: var(--ink-soft);
+    }
+    .ver em { font-style: normal; font-size: 10.5px; font-weight: 500; color: var(--muted); }
+    .ver.is-here { background: var(--teal-soft); color: var(--teal-dark); }
+    .ver.is-here em { color: #4f7a72; }
+    a.ver { border: 1px solid var(--line); transition: border-color .16s ease, background .16s ease, color .16s ease; }
+    a.ver:hover { border-color: var(--teal); background: var(--teal-soft); color: var(--teal-dark); }
+
+    /* ---------------- 通用块 ---------------- */
+    section { scroll-margin-top: 96px; }
+    section + section { margin-top: 64px; }
+
+    .eyebrow {
+      display: inline-block; margin-bottom: 10px;
+      font-size: 10.5px; font-weight: 700; letter-spacing: .18em;
+      color: var(--teal-dark);
+    }
+
+    .hero h1 {
+      margin: 0; font-size: clamp(32px, 5.6vw, 58px); font-weight: 800;
+      line-height: 1.14; letter-spacing: -.02em; color: var(--ink);
+    }
+    .hero h1 span { color: var(--teal-dark); }
+    .lead { max-width: 60ch; margin: 18px 0 0; font-size: 15.5px; color: var(--ink-soft); }
+
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px 18px; border-radius: 10px;
+      border: 1px solid transparent;
+      font-size: 13.5px; font-weight: 700;
+      transition: transform .16s ease, background .16s ease, border-color .16s ease, color .16s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: var(--teal); border-color: var(--teal); color: #fff; box-shadow: 0 10px 22px rgba(11, 139, 130, .18); }
+    .btn-primary:hover { background: var(--teal-dark); border-color: var(--teal-dark); }
+    .btn-soft { background: var(--teal-soft); border-color: var(--mint-deep); color: var(--teal-dark); }
+    .btn-ghost { background: var(--paper); border-color: var(--line-strong); color: var(--ink-soft); }
+    .btn-ghost:hover { border-color: var(--teal); color: var(--teal-dark); }
+
+    .stats {
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px; margin-top: 32px;
+      padding-top: 22px; border-top: 1px solid var(--line);
+    }
+    .stat b { display: block; font-size: clamp(22px, 2.4vw, 30px); line-height: 1.2; color: var(--teal-dark); font-variant-numeric: tabular-nums; }
+    .stat span { font-size: 12px; color: var(--muted); }
+
+    .section-head { margin-bottom: 22px; }
+    .section-head h2 {
+      margin: 0; font-size: clamp(23px, 3vw, 31px); font-weight: 800;
+      line-height: 1.35; letter-spacing: -.01em;
+    }
+    .section-head p { max-width: 68ch; margin: 10px 0 0; font-size: 14px; color: var(--muted); }
+
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ---------------- 作品卡片 ---------------- */
+    .work-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 18px;
+    }
+
+    .work { display: flex; flex-direction: column; padding: 22px 22px 20px; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+    .work:hover { transform: translateY(-3px); border-color: var(--line-strong); box-shadow: var(--shadow); }
+
+    .work-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .work-no { font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .08em; }
+    .work-badge {
+      padding: 3px 9px; border-radius: 999px;
+      background: var(--teal-soft); color: var(--teal-dark);
+      font-size: 10.5px; font-weight: 700;
+    }
+
+    .work-icon {
+      width: 56px; height: 56px; border-radius: 16px;
+      display: grid; place-items: center; overflow: hidden;
+      border: 1px solid var(--line);
+      background: var(--paper-soft);
+      margin-bottom: 16px;
+    }
+    .work-icon img { width: 100%; height: 100%; object-fit: cover; }
+    .work-icon-3d {
+      border: 0;
+      background: linear-gradient(145deg, #1b7fa6, #0d3f5e);
+      color: #eaf7ff; font-family: var(--mono); font-size: 17px; font-weight: 700;
+      letter-spacing: .02em;
+    }
+
+    .work h3 { margin: 0; font-size: 18px; font-weight: 800; line-height: 1.4; }
+    .work-sub { margin: 5px 0 0; font-size: 12px; color: var(--teal-dark); font-weight: 600; }
+    .work-desc { margin: 12px 0 0; font-size: 13px; line-height: 1.8; color: var(--muted); }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+    .tags span {
+      padding: 3px 9px; border: 1px solid var(--line);
+      border-radius: 999px; font-size: 11px; color: var(--ink-soft);
+      background: var(--paper-soft);
+    }
+
+    .work-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 18px; }
+    .work-actions .btn { padding: 8px 13px; font-size: 12.5px; border-radius: 8px; }
+
+    /* ---------------- 作品详情：三个作品共用同一块版式 ----------------
+       没有「主角位」：标签切换的只是内容，容器、字号、间距全都一致。 */
+    .detail-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+
+    .detail-tab {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 15px; border: 1px solid var(--line); border-radius: 999px;
+      background: var(--paper); color: var(--ink-soft);
+      font: inherit; font-size: 13px; font-weight: 700;
+      cursor: pointer;
+      transition: color .16s ease, background .16s ease, border-color .16s ease;
+    }
+    .detail-tab .no { font-family: var(--mono); font-size: 10.5px; font-weight: 700; color: var(--muted); }
+    .detail-tab:hover { border-color: var(--teal); color: var(--teal-dark); }
+    .detail-tab[aria-selected="true"] { background: var(--teal); border-color: var(--teal); color: #fff; }
+    .detail-tab[aria-selected="true"] .no { color: rgba(255, 255, 255, .72); }
+
+    .detail-panel {
+      padding: 26px;
+      border: 1px solid var(--line); border-radius: var(--radius);
+      background: var(--paper); box-shadow: var(--shadow-sm);
+    }
+    .detail-inner {
+      display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+      gap: 28px; align-items: center;
+    }
+    .detail-copy h2 { margin: 0; font-size: clamp(24px, 3vw, 33px); font-weight: 800; line-height: 1.32; letter-spacing: -.01em; }
+    .detail-copy h2 span { color: var(--teal-dark); }
+    .detail-copy > p { margin: 14px 0 0; font-size: 14px; color: var(--ink-soft); }
+
+    .detail-specs { margin-top: 20px; border-top: 1px solid var(--line); }
+
+    /* 右半边：每个作品一张 CSS 画的小示意图，同一个窗口外壳 */
+    .demo-frame {
+      background: var(--paper); border: 1px solid var(--line);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .demo-bar {
+      display: flex; align-items: center; gap: 6px;
+      padding: 11px 14px; border-bottom: 1px solid var(--line);
+      background: var(--paper-soft);
+    }
+    .demo-bar i { width: 8px; height: 8px; border-radius: 50%; background: var(--line-strong); display: block; }
+    .demo-bar i:first-child { background: #f0b7ae; }
+    .demo-bar i:nth-child(2) { background: #f2dca8; }
+    .demo-bar i:nth-child(3) { background: #b9dfc9; }
+    .demo-bar span { margin-left: 8px; font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
+
+    .demo-body { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 18px; }
+    .demo-glyph {
+      display: grid; place-items: center;
+      aspect-ratio: 1 / 1;
+      border: 1px solid var(--line); border-radius: var(--radius-sm);
+      background: #fff;
+      font-family: "KaiTi", "STKaiti", "楷体", serif;
+      font-size: clamp(78px, 11vw, 116px); line-height: 1;
+      color: #17322b;
+    }
+    .demo-panel b { display: block; font-size: 11px; letter-spacing: .08em; color: var(--muted); margin-bottom: 10px; }
+    .cand { display: grid; grid-template-columns: 26px 1fr 34px; align-items: center; gap: 8px; margin-bottom: 9px; }
+    .cand span { font-family: "KaiTi", serif; font-size: 19px; color: var(--ink); }
+    .cand i { height: 6px; border-radius: 3px; background: var(--mint-deep); display: block; }
+    .cand:nth-child(3) i { background: #d9ece5; }
+    .cand:nth-child(4) i { background: #e6f1ec; }
+    .cand em { font-style: normal; font-family: var(--mono); font-size: 10.5px; color: var(--muted); text-align: right; }
+    .demo-tip { margin: 0 0 8px; font-size: 10.5px; letter-spacing: .04em; color: var(--muted); }
+
+    /* 日程助手：待办清单示意 */
+    .demo-body--list { display: block; padding: 16px 18px 18px; }
+    .task {
+      display: grid; grid-template-columns: 20px 1fr auto; align-items: center; gap: 10px;
+      padding: 11px 0; border-bottom: 1px solid var(--line);
+    }
+    .task:last-of-type { border-bottom: 0; }
+    .task .tick {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 1.5px solid var(--line-strong);
+      display: grid; place-items: center;
+      font-size: 10px; color: transparent;
+    }
+    .task.done .tick { background: var(--teal); border-color: var(--teal); color: #fff; }
+    .task b { font-size: 13px; font-weight: 650; color: var(--ink); }
+    .task.done b { color: var(--muted); text-decoration: line-through; }
+    .task em { font-style: normal; font-size: 10.5px; color: var(--muted); }
+    .task-add {
+      margin-top: 14px; padding: 9px 12px; border-radius: 8px;
+      border: 1px dashed var(--line-strong);
+      font-size: 12px; color: var(--muted); text-align: center;
+    }
+
+    /* 作品数据立方：三根柱子示意 */
+    .demo-body--bars { display: block; padding: 18px 16px 14px; }
+    .cube-scene {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      gap: 14px; height: 132px; padding: 0 6px;
+      border-bottom: 1px solid var(--line);
+    }
+    .cube-col { flex: 1; height: 100%; display: flex; align-items: flex-end; justify-content: center; }
+    .cube-col i {
+      width: min(100%, 52px); height: var(--h); display: block;
+      border-radius: 8px 8px 0 0;
+      background: linear-gradient(180deg, var(--mint-deep), #e6f1ec);
+    }
+    .cube-col:nth-child(2) i { background: linear-gradient(180deg, #c9e9df, #eef7f4); }
+    .cube-col:nth-child(3) i { background: linear-gradient(180deg, #cfe2f3, #eff6fc); }
+    .cube-labels { display: flex; gap: 14px; padding: 9px 6px 0; }
+    .cube-labels span { flex: 1; text-align: center; font-size: 10.5px; color: var(--muted); }
+
+    .checklist { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 9px; }
+    .checklist li { position: relative; padding-left: 22px; font-size: 13px; color: var(--ink-soft); }
+    .checklist li::before {
+      content: "✓"; position: absolute; left: 0; top: 0;
+      color: var(--teal); font-weight: 800; font-size: 12px;
+    }
+
+    .feature-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 14px; margin-top: 26px;
+    }
+    .feature { padding: 20px; }
+    .feature-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: grid; place-items: center; margin-bottom: 13px;
+      background: var(--teal-soft); color: var(--teal-dark);
+      font-size: 14px; font-weight: 800;
+    }
+    .feature h3 { margin: 0; font-size: 15.5px; font-weight: 800; }
+    .feature p { margin: 8px 0 0; font-size: 12.5px; line-height: 1.8; color: var(--muted); }
+    .feature .badge {
+      display: inline-block; margin-top: 14px; padding: 3px 8px;
+      border-radius: 999px; background: var(--paper-soft); border: 1px solid var(--line);
+      font-family: var(--mono); font-size: 10px; color: var(--muted);
+    }
+
+    /* ---------------- 技术栈 ---------------- */
+    .stack-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .panel { padding: 22px; }
+    .panel h3 { margin: 0 0 4px; font-size: 16px; font-weight: 800; }
+    .panel .panel-sub { margin: 0 0 14px; font-size: 12px; color: var(--muted); }
+    .spec { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px dashed var(--line); font-size: 12.5px; }
+    .spec:last-child { border-bottom: 0; }
+    .spec span { color: var(--muted); }
+    .spec b { text-align: right; font-weight: 700; color: var(--ink); }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+    .chip {
+      padding: 4px 10px; border-radius: 999px;
+      background: var(--paper-soft); border: 1px solid var(--line);
+      font-size: 11.5px; color: var(--ink-soft);
+    }
+
+    /* ---------------- 页脚 ---------------- */
+    .footer {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 22px 8px 34px; margin-top: 20px;
+      border-top: 1px solid var(--line);
+      font-size: 12px; color: var(--muted);
+    }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 14px; }
+    .footer-links a:hover { color: var(--teal-dark); }
+
+    /* ---------------- 响应式 ---------------- */
+    @media (max-width: 980px) {
+      /* minmax(0,1fr)：留一个 0 下限，长内容不会把整列顶宽导致横向溢出 */
+      .layout { grid-template-columns: minmax(0, 1fr); gap: 22px; padding-top: 18px; }
+      .rail { position: static; }
+      .rail-title, .rail-note, .rail-ver { display: none; }
+      .toc {
+        display: flex; gap: 6px; overflow-x: auto;
+        border-left: 0; padding-bottom: 4px;
+        scrollbar-width: thin;
+      }
+      .toc a {
+        flex: 0 0 auto; margin-left: 0; padding: 7px 12px;
+        border: 1px solid var(--line); border-radius: 999px;
+        background: var(--paper); font-size: 12.5px;
+      }
+      .toc a.active { border-color: var(--teal); }
+      .detail-inner { grid-template-columns: minmax(0, 1fr); }
+    }
+
+    @media (max-width: 640px) {
+      .page { padding: 0 14px; }
+      .topbar { min-height: 64px; gap: 10px; }
+      .topnav { display: none; }
+      .brand-name { font-size: 16px; }
+      .brand-mark { width: 34px; height: 34px; border-radius: 10px; font-size: 14px; }
+      .top-action { font-size: 11.5px; padding: 6px 10px; }
+      /* 窄屏优先保住「旧版目录」这颗版本按钮，仓库链接让位 */
+      .top-actions .top-action:not(.top-action--ver) { display: none; }
+      .layout { padding-bottom: 40px; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+      .demo-body { grid-template-columns: 1fr; }
+      .demo-glyph { aspect-ratio: 2 / 1; font-size: 72px; }
+      section + section { margin-top: 46px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+
+<body id="top">
+  <div class="page">
+
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="回到顶部">
+        <span class="brand-mark" aria-hidden="true">x.</span>
+        <span class="brand-name">xxy的作品<small>WORKS OVERVIEW</small></span>
+      </a>
+
+      <nav class="topnav" aria-label="页面导航">
+        <a href="#works">作品</a>
+        <a href="#detail">详情</a>
+        <a href="#stack">技术栈</a>
+      </nav>
+
+      <div class="top-actions">
+        <a class="top-action top-action--ver" href="前端html学习网页/作品目录.html">旧版目录 ↗</a>
+        <a class="top-action" href="https://github.com/wocao123103/smart_schedule" target="_blank"
+          rel="noopener noreferrer">GitHub 仓库 ↗</a>
+      </div>
+    </header>
+
+    <div class="layout">
+
+      <!-- 左栏：沿用 作品目录.html 的目录骨架，改成页内锚点 -->
+      <aside class="rail" aria-label="页内目录">
+        <div class="rail-title">ON THIS PAGE</div>
+        <nav class="toc" id="toc">
+          <a class="active" href="#overview">概览</a>
+          <a href="#works">作品入口</a>
+          <a href="#detail">作品详情</a>
+          <a href="#stack">技术栈</a>
+          </nav>
+        <div class="rail-note">
+          <b>一页总览。</b><br>
+          左边是目录，右边是作品。<br>
+          本页不依赖 CDN，断网也能打开。
+        </div>
+
+        <!-- 版本切换：这里去旧版，旧版那边回到这里 -->
+        <div class="rail-ver">
+          <p>版本 / VERSION</p>
+          <span class="ver is-here">新版 · 本页<em>单页总览</em></span>
+          <a class="ver" href="前端html学习网页/作品目录.html">旧版 · 目录页 ↗<em>左目录 + 留白</em></a>
+        </div>
+      </aside>
+
+      <main>
+        <!-- ---------- 概览 ---------- -->
+        <section id="overview" class="hero">
+          <span class="eyebrow">WORKS · 2026</span>
+          <h1>做过的东西，<br><span>放在一个页面里。</span></h1>
+          <p class="lead">
+            原来是两页：一页只有目录，右边留白；一页只讲墨识。现在合成一页——
+            目录还在左边，墨识的内容也搬了进来，留白不再只是为了留白。
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#works">看作品 ↓</a>
+            <a class="btn btn-soft" href="#detail">作品详情</a>
+            <a class="btn btn-ghost" href="前端html学习网页/作品目录.html">旧版目录 ↗</a>
+          </div>
+
+          <div class="stats" aria-label="作品数据">
+            <div class="stat"><b>3</b><span>个作品</span></div>
+            <div class="stat"><b>2</b><span>套技术栈</span></div>
+            <div class="stat"><b>1</b><span>个 3D 实验</span></div>
+            <div class="stat"><b>2026</b><span>最近更新</span></div>
+          </div>
+        </section>
+
+        <!-- ---------- 作品入口 ---------- -->
+        <section id="works">
+          <div class="section-head">
+            <span class="eyebrow">WORKS</span>
+            <h2>三个入口，都是真的能点开的。</h2>
+            <p>卡片上的图标、标题和链接来自页面底部这段 WORKS 数组；改数据就能改这一屏，不用动 HTML。</p>
+          </div>
+          <div class="work-grid" id="work-grid"></div>
+        </section>
+
+        <!-- ---------- 作品详情：三个作品共用，谁都不单开一节 ---------- -->
+        <section id="detail">
+          <div class="section-head">
+            <span class="eyebrow">DETAILS</span>
+            <h2>三个作品，同一块版式。</h2>
+            <p>没有谁被单独拎出去：下面是共用的详情区，切标签换的只是内容，容器和字号一模一样。</p>
+          </div>
+
+          <!-- 标签与内容都按 WORKS 数组生成，见页面底部脚本 -->
+          <div class="detail-tabs" id="detail-tabs" role="tablist" aria-label="切换作品详情"></div>
+          <div class="detail-panel" id="detail-panel" role="tabpanel" aria-live="polite"></div>
+        </section>
+
+        <!-- ---------- 技术栈 ---------- -->
+        <section id="stack">
+          <div class="section-head">
+            <span class="eyebrow">UNDER THE HOOD</span>
+            <h2>三个页面，三套很轻的技术栈。</h2>
+            <p>没有构建工具、没有包管理器、没有 CDN。除了 3D 页的本地 三维引擎.min.js，其余都是原生 HTML / CSS / JS。</p>
+          </div>
+
+          <div class="stack-grid">
+            <article class="card panel">
+              <h3>本页 · 作品总览</h3>
+              <p class="panel-sub">单文件，CSS 与 JS 内联</p>
+              <div class="spec"><span>结构</span><b>语义化 HTML</b></div>
+              <div class="spec"><span>布局</span><b>Grid + Flex</b></div>
+              <div class="spec"><span>目录高亮</span><b>IntersectionObserver</b></div>
+              <div class="spec"><span>外部依赖</span><b>仅两张图标</b></div>
+            </article>
+
+            <article class="card panel">
+              <h3>3D 作品架</h3>
+              <p class="panel-sub">Three.js r155 · 本地文件</p>
+              <div class="spec"><span>库</span><b>三维引擎.min.js（630 KB）</b></div>
+              <div class="spec"><span>数据</span><b>作品数据.js 单一数据源</b></div>
+              <div class="spec"><span>交互</span><b>射线拾取 / 推拉 / 缩放</b></div>
+              <div class="spec"><span>离线</span><b>双击即可，无 CDN</b></div>
+            </article>
+
+            <article class="card panel">
+              <h3>墨识</h3>
+              <p class="panel-sub">本地推理 + 本地训练</p>
+              <div class="spec"><span>模型</span><b>MobileNetV2 · 5200 类</b></div>
+              <div class="spec"><span>训练</span><b>PyTorch 2.11 / CUDA 12.8</b></div>
+              <div class="spec"><span>桌面壳</span><b>PySide6</b></div>
+              <div class="spec"><span>设备</span><b>只监听 127.0.0.1</b></div>
+            </article>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <footer class="footer">
+      <div><b>作品总览</b> · xxy的作品 <span style="color:#a8bbb5">/</span> 原生 HTML + CSS + JS</div>
+      <div class="footer-links">
+        <a href="#top">回到顶部 ↑</a>
+        <a href="前端html学习网页/作品目录.html">旧版目录</a>
+        <a href="三维作品架/作品数据立方.html">3D 作品架</a>
+        <span>© <span id="year">2026</span> xxy</span>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    /* ============================================================
+       作品数据：卡片全部由这段数组生成。
+       加作品只在这里加一条；图标放 素材/ 即可。
+       ============================================================ */
+    const WORKS = [
+      {
+        no: '01',
+        tab: '日程助手',
+        badge: '简介页',
+        title: '日程助手 · 简介网页',
+        sub: 'Python 课作品 · 智能待办',
+        desc: '深色极光背景、左右两条侧栏的作品介绍页，也是本页夜间配色的来源。',
+        tags: ['Python 课', '极光背景', '左右侧栏'],
+        icon: { type: 'img', src: '素材/日程助手图标.png', alt: '日程助手图标' },
+        link: {
+          label: '打开页面 ↗',
+          href: 'https://wocao123103.github.io/smart_schedule/python%E8%AF%BE%E5%8A%A0%E8%BD%BD%E7%BD%91%E9%A1%B5.html',
+          external: true
+        },
+        detail: {
+          h2: '把今天的事，<br><span>排成一条时间线。</span>',
+          lead: 'Python 课的结课作品：左边目录、右边正文的单页介绍，真正的排程逻辑在本地脚本里跑。',
+          specs: [
+            ['类型', 'Python 课作业'],
+            ['形态', '单页 + 两条侧栏'],
+            ['配色', '深色极光渐变'],
+            ['发布', 'GitHub Pages']
+          ],
+          points: [
+            '左边目录跟着滚动高亮，右边正文一段段往下推',
+            '极光背景由两层径向渐变叠出来，不加载任何图片',
+            '整页只有一个 HTML，改完推上 Pages 就能看'
+          ],
+          actions: [
+            {
+              label: '打开页面 ↗',
+              href: 'https://wocao123103.github.io/smart_schedule/python%E8%AF%BE%E5%8A%A0%E8%BD%BD%E7%BD%91%E9%A1%B5.html',
+              external: true
+            },
+            {
+              label: 'GitHub 仓库 ↗',
+              href: 'https://github.com/wocao123103/smart_schedule',
+              external: true
+            }
+          ],
+          demo: 'schedule',
+          features: [
+            { icon: '◐', title: '极光背景', text: '紫、青、粉三层光斑压在深色底上，本页夜间模式的取色就来自这里。', tag: 'aurora' },
+            { icon: '≡', title: '左右侧栏', text: '左边是目录，右边是正文，滚动时目录自动跟到当前段落。', tag: 'two columns' },
+            { icon: '↗', title: '单页发布', text: '一个 HTML 直接托管到 GitHub Pages，没有构建步骤。', tag: 'static' }
+          ]
+        }
+      },
+      {
+        no: '02',
+        tab: '墨识',
+        badge: '介绍页',
+        title: '墨识 · 本地手写识别',
+        sub: '5200 类 · 本地推理 · 离线可用',
+        desc: '白绿卡片式介绍页，底部用 LINKS 集中管理外链。本页详情区的墨识部分就是从它提炼的。',
+        tags: ['5200 类', '本地优先', '离线可用'],
+        icon: { type: 'img', src: '素材/墨识图标.png', alt: '墨识 logo' },
+        link: {
+          label: '打开介绍页 ↗',
+          href: 'https://wocao123103.github.io/ink_recognition-moshi-/index.html',
+          external: true
+        },
+        detail: {
+          h2: '把字迹，<br><span>变成可理解的字。</span>',
+          lead: '本地优先的手写识别工作台：5200 类汉字、数字串动态识别、20 张样本新增类别、网页内优化训练。数据不出本机，断网也能用。',
+          specs: [
+            ['模型', 'MobileNetV2 · 5200 类'],
+            ['旧类回放', '98.17%'],
+            ['样本', '1,778'],
+            ['设备', '只监听 127.0.0.1']
+          ],
+          points: [
+            '识别、修正、样本、训练、复核在同一条链路上完成',
+            '冻结主干、只训练新类，旧类回放守住原来的识别能力',
+            'AI 复核是可选项，最终仍由你确认'
+          ],
+          actions: [
+            {
+              label: '打开介绍页 ↗',
+              href: 'https://wocao123103.github.io/ink_recognition-moshi-/index.html',
+              external: true
+            },
+            {
+              label: '下载完整版 · 提取码 8912 ↗',
+              href: 'https://pan.baidu.com/s/1Y4puuVb8J-xsr4F-bLqMDQ?pwd=8912',
+              external: true
+            }
+          ],
+          demo: 'moshi',
+          features: [
+            { icon: '字', title: '5200 类汉字底座', text: '从 3760 类扩展到 5200 类，覆盖常用字与 GB2312 二级字；旧类回放保持 98.17%。', tag: '5200 classes' },
+            { icon: '+', title: '手写 4 张补样本 / 20 张新增字', text: '类别库外的手写字也能加入：手写 20 张即可扩展分类头并只训练新类；调试模式下还会自动推荐样本库未出现的字，手写 4 张补样本。', tag: 'custom category' },
+            { icon: '123', title: '数字串 · 动态识别', text: '一行连续写多位数字，按连通域分割；开启动态识别后，停笔约 0.7 秒自动出结果。', tag: 'multi-digit' },
+            { icon: '↻', title: '网页内优化训练', text: '冻结主干、解冻最后 3 个 block 与分类头；本地样本 + 字体合成 + HWDB 回放，完成后自动热加载。', tag: 'fine-tune' },
+            { icon: 'AI', title: 'AI 交叉复核', text: '通义千问 VL、智谱 GLM-4V、OpenAI、Moonshot、DeepSeek、Ollama 或自定义端点，参与逐字对比。', tag: 'optional' },
+            { icon: '↓', title: '安装助手 · 一键部署', text: 'PySide6 安装向导、自动建目录、Conda 优先；覆盖升级时保留样本、报告与 AI 配置。', tag: 'Windows' }
+          ]
+        }
+      },
+      {
+        no: '03',
+        tab: '作品数据立方',
+        badge: '3D 实验',
+        title: '作品数据立方',
+        sub: 'Three.js · 数据驱动',
+        desc: '作品列表、统计和 3D 柱子绑在同一份 作品数据.js 上；换视图、扰动数据，画面一起变。',
+        tags: ['Three.js', '数据驱动', '可缩放'],
+        icon: { type: 'text', text: '3D' },
+        link: { label: '打开 3D 作品架 ↗', href: '三维作品架/作品数据立方.html', external: true },
+        detail: {
+          h2: '同一份数据，<br><span>长出三种样子。</span>',
+          lead: '数据驱动的小实验：目录、统计、图例和 3D 柱子读的都是同一份 作品数据.js，换视图或扰动数据时，DOM 和场景一起变。',
+          specs: [
+            ['库', 'Three.js r155'],
+            ['数据', '作品数据.js 单一数据源'],
+            ['视角', '推拉 14 – 180'],
+            ['缩放', '整体 0.6 – 1.8']
+          ],
+          points: [
+            '三根柱子 = 三个作品，柱子高度是体量指数',
+            '相机推拉和整体缩放是两套独立参数，互不干扰',
+            '点柱身、柱顶道具或悬浮标签，都能选中同一个作品'
+          ],
+          actions: [
+            { label: '打开 3D 作品架 ↗', href: '三维作品架/作品数据立方.html', external: true },
+            { label: '看数据源 ↗', href: '三维作品架/作品数据.js', external: true }
+          ],
+          demo: 'cube',
+          features: [
+            { icon: '◫', title: '一份数据', text: '作品数据.js 里改一个数，左侧目录、统计条和 3D 柱子同时跟着变。', tag: 'single source' },
+            { icon: '↕', title: '两层缩放', text: '滚轮推拉相机、滑杆缩放整个世界，雾距和阴影范围一起补偿。', tag: 'zoom' },
+            { icon: '◎', title: '射线拾取', text: '点柱身、柱顶道具或悬浮标签，向上找到同一个 barId。', tag: 'picking' }
+          ]
+        }
+      }
+    ];
+
+    /* 详情区右半边：三个作品各一张纯 CSS 示意图，外壳（窗口条）完全一样 */
+    const DEMOS = {
+      schedule: function () {
+        return '<div class="demo-frame" aria-hidden="true">'
+          + '<div class="demo-bar"><i></i><i></i><i></i><span>智能待办 · 今天</span></div>'
+          + '<div class="demo-body demo-body--list">'
+          +   '<p class="demo-tip">2026-11-10 · 周二</p>'
+          +   '<div class="task done"><span class="tick">✓</span><b>08:30 晨会同步</b><em>已完成</em></div>'
+          +   '<div class="task"><span class="tick"></span><b>14:00 交周报</b><em>待办</em></div>'
+          +   '<div class="task"><span class="tick"></span><b>19:30 跑一次训练</b><em>待办</em></div>'
+          +   '<div class="task-add">+ 添加待办</div>'
+          + '</div>'
+          + '</div>';
+      },
+      moshi: function () {
+        return '<div class="demo-frame" aria-hidden="true">'
+          + '<div class="demo-bar"><i></i><i></i><i></i><span>127.0.0.1:18620</span></div>'
+          + '<div class="demo-body">'
+          +   '<div class="demo-glyph">墨</div>'
+          +   '<div class="demo-panel">'
+          +     '<b>TOP-5 候选</b>'
+          +     '<div class="cand"><span>墨</span><i style="width:88%"></i><em>0.941</em></div>'
+          +     '<div class="cand"><span>黑</span><i style="width:52%"></i><em>0.012</em></div>'
+          +     '<div class="cand"><span>默</span><i style="width:34%"></i><em>0.008</em></div>'
+          +     '<p class="demo-tip">写 → 识别 → 修正 → 训练</p>'
+          +   '</div>'
+          + '</div>'
+          + '</div>';
+      },
+      cube: function () {
+        return '<div class="demo-frame" aria-hidden="true">'
+          + '<div class="demo-bar"><i></i><i></i><i></i><span>作品数据立方 · 按作品</span></div>'
+          + '<div class="demo-body demo-body--bars">'
+          +   '<div class="cube-scene">'
+          +     '<div class="cube-col"><i style="--h:88%"></i></div>'
+          +     '<div class="cube-col"><i style="--h:62%"></i></div>'
+          +     '<div class="cube-col"><i style="--h:73%"></i></div>'
+          +   '</div>'
+          +   '<div class="cube-labels"><span>总展示</span><span>日程助手</span><span>墨识</span></div>'
+          + '</div>'
+          + '</div>';
+      }
+    };
+
+    let activeWork = 0;
+
+    function esc(v) {
+      return String(v).replace(/[&<>"]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+      });
+    }
+
+    /* 标签条：一个作品一枚，样式完全一致 */
+    function renderTabs() {
+      const box = document.getElementById('detail-tabs');
+      if (!box) return;
+      box.innerHTML = '';
+      WORKS.forEach(function (w, i) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'detail-tab';
+        btn.id = 'tab-' + w.no;
+        btn.setAttribute('role', 'tab');
+        btn.setAttribute('aria-controls', 'detail-panel');
+        btn.setAttribute('aria-selected', i === activeWork ? 'true' : 'false');
+        btn.innerHTML = '<span class="no">' + esc(w.no) + '</span>' + esc(w.tab);
+        btn.addEventListener('click', function () { selectWork(i, false); });
+        /* 键盘左右键在三个标签间移动，和 ARIA 的 tab 模式一致 */
+        btn.addEventListener('keydown', function (e) {
+          if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+          e.preventDefault();
+          const next = (i + (e.key === 'ArrowRight' ? 1 : WORKS.length - 1)) % WORKS.length;
+          selectWork(next, false);
+          const target = document.getElementById('tab-' + WORKS[next].no);
+          if (target) target.focus();
+        });
+        box.appendChild(btn);
+      });
+    }
+
+    function featureHTML(list) {
+      return '<div class="feature-grid">' + list.map(function (f) {
+        return '<article class="card feature">'
+          + '<div class="feature-icon">' + esc(f.icon) + '</div>'
+          + '<h3>' + esc(f.title) + '</h3>'
+          + '<p>' + esc(f.text) + '</p>'
+          + (f.tag ? '<span class="badge">' + esc(f.tag) + '</span>' : '')
+          + '</article>';
+      }).join('') + '</div>';
+    }
+
+    /* 详情区：同样的骨架，只换里面的字和示意图 */
+    function renderPanel() {
+      const panel = document.getElementById('detail-panel');
+      if (!panel) return;
+      const w = WORKS[activeWork];
+      const d = w.detail;
+
+      const specs = d.specs.map(function (r) {
+        return '<div class="spec"><span>' + esc(r[0]) + '</span><b>' + esc(r[1]) + '</b></div>';
+      }).join('');
+
+      const points = '<ul class="checklist">' + d.points.map(function (t) {
+        return '<li>' + esc(t) + '</li>';
+      }).join('') + '</ul>';
+
+      const acts = d.actions.map(function (a, i) {
+        return '<a class="btn ' + (i === 0 ? 'btn-primary' : 'btn-ghost') + '" href="' + a.href + '"'
+          + (a.external ? ' target="_blank" rel="noopener noreferrer"' : '') + '>'
+          + esc(a.label) + '</a>';
+      }).join('');
+
+      panel.setAttribute('aria-labelledby', 'tab-' + w.no);
+      panel.innerHTML =
+        '<div class="detail-inner">'
+        + '<div class="detail-copy">'
+        +   '<span class="eyebrow">' + esc(w.no + ' · ' + w.badge) + '</span>'
+        +   '<h2>' + d.h2 + '</h2>'
+        +   '<p>' + esc(d.lead) + '</p>'
+        +   '<div class="detail-specs">' + specs + '</div>'
+        +   points
+        +   '<div class="hero-actions">' + acts + '</div>'
+        + '</div>'
+        + '<div class="demo-slot">' + DEMOS[d.demo]() + '</div>'
+        + '</div>'
+        + (d.features ? featureHTML(d.features) : '');
+    }
+
+    function selectWork(i, scroll) {
+      if (i < 0 || i >= WORKS.length) return;
+      activeWork = i;
+      Array.prototype.forEach.call(document.querySelectorAll('.detail-tab'), function (b, k) {
+        b.setAttribute('aria-selected', k === i ? 'true' : 'false');
+      });
+      renderPanel();
+      if (scroll) {
+        const el = document.getElementById('detail');
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    /* 卡片：每张卡的第一颗按钮都指向同一块详情区，谁都不例外 */
+    function renderWorks() {
+      const grid = document.getElementById('work-grid');
+      if (!grid) return;
+
+      WORKS.forEach(function (w, i) {
+        const card = document.createElement('article');
+        card.className = 'card work';
+
+        const top = document.createElement('div');
+        top.className = 'work-top';
+        const no = document.createElement('span');
+        no.className = 'work-no';
+        no.textContent = w.no;
+        const badge = document.createElement('span');
+        badge.className = 'work-badge';
+        badge.textContent = w.badge;
+        top.appendChild(no);
+        top.appendChild(badge);
+        card.appendChild(top);
+
+        const icon = document.createElement('div');
+        icon.className = 'work-icon';
+        if (w.icon.type === 'img') {
+          const img = document.createElement('img');
+          img.src = w.icon.src;
+          img.alt = w.icon.alt || '';
+          img.loading = 'lazy';
+          icon.appendChild(img);
+        } else {
+          icon.classList.add('work-icon-3d');
+          icon.textContent = w.icon.text;
+        }
+        card.appendChild(icon);
+
+        const h3 = document.createElement('h3');
+        h3.textContent = w.title;
+        card.appendChild(h3);
+
+        const sub = document.createElement('p');
+        sub.className = 'work-sub';
+        sub.textContent = w.sub;
+        card.appendChild(sub);
+
+        const desc = document.createElement('p');
+        desc.className = 'work-desc';
+        desc.textContent = w.desc;
+        card.appendChild(desc);
+
+        const tags = document.createElement('div');
+        tags.className = 'tags';
+        w.tags.forEach(function (t) {
+          const s = document.createElement('span');
+          s.textContent = t;
+          tags.appendChild(s);
+        });
+        card.appendChild(tags);
+
+        const actions = document.createElement('div');
+        actions.className = 'work-actions';
+
+        const more = document.createElement('a');
+        more.className = 'btn btn-primary';
+        more.textContent = '看详情 ↓';
+        more.href = '#detail';
+        more.addEventListener('click', function () { selectWork(i, false); });
+        actions.appendChild(more);
+
+        if (w.link) {
+          const out = document.createElement('a');
+          out.className = 'btn btn-ghost';
+          out.textContent = w.link.label;
+          out.href = w.link.href;
+          if (w.link.external) {
+            out.target = '_blank';
+            out.rel = 'noopener noreferrer';
+          }
+          actions.appendChild(out);
+        }
+
+        card.appendChild(actions);
+        grid.appendChild(card);
+      });
+    }
+
+    renderTabs();
+    renderPanel();
+    renderWorks();
+
+    /* 目录高亮：滚到哪个 section，左边就点亮哪一项 */
+    (function tocHighlight() {
+      const links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+      const sections = links
+        .map(function (a) { return document.querySelector(a.getAttribute('href')); })
+        .filter(Boolean);
+
+      if (!('IntersectionObserver' in window) || !sections.length) return;
+
+      const io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          const id = '#' + entry.target.id;
+          links.forEach(function (a) {
+            a.classList.toggle('active', a.getAttribute('href') === id);
+          });
+        });
+      }, { rootMargin: '-30% 0px -60% 0px', threshold: 0 });
+
+      sections.forEach(function (s) { io.observe(s); });
+    })();
+
+    /* 页脚年份 */
+    (function year() {
+      const el = document.getElementById('year');
+      if (el) el.textContent = String(new Date().getFullYear());
+    })();
+  </script>
+</body>
+
+</html>
