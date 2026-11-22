@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<!-- 作品总展示页：左栏列入口，右侧先留白。样式在同目录的 样式.css -->
+<!-- 作品总展示页：左栏列出全部作品入口，右侧留白。样式在同目录的 样式.css -->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>作品总展示 · xxy的作品</title>
-  <meta name="description" content="xxy 的作品总展示页：左栏列出各作品入口，右侧先留白。">
+  <meta name="description" content="xxy 的作品总展示页：左栏列出全部作品入口，右侧留白。">
   <meta name="theme-color" content="#ffffff">
   <link rel="icon"
     href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23166b59'/%3E%3Ctext x='32' y='43' font-size='32' font-family='sans-serif' font-weight='700' fill='white' text-anchor='middle'%3Ex%3C/text%3E%3C/svg%3E">
@@ -26,14 +26,35 @@
 
   <div class="workspace">
 
-    <!-- 左侧目录：只放真能点开的入口。新增作品就复制一个 <li>，改序号、文字和 href。 -->
+    <!-- 左侧目录：把全部作品列在这里。新增作品就复制一个 <li>，改序号、文字和 href。 -->
     <aside class="toc" aria-label="作品目录">
       <p class="toc-title">作品入口 / WORKS</p>
       <ul class="toc-list">
         <li>
-          <a class="toc-link" href="python课加载网页.html" title="智能日程助手 · 介绍页">
+          <a class="toc-link" href="python课加载网页.html" title="智能日程助手">
             <span class="idx">01</span>
-            <span class="txt">智能日程助手 · 介绍页</span>
+            <span class="txt">智能日程助手</span>
+            <span class="arrow" aria-hidden="true">↗</span>
+          </a>
+        </li>
+        <li>
+          <a class="toc-link" href="../墨识介绍页-本地副本.html" title="墨识 · 本地手写识别">
+            <span class="idx">02</span>
+            <span class="txt">墨识 · 本地手写识别</span>
+            <span class="arrow" aria-hidden="true">↗</span>
+          </a>
+        </li>
+        <li>
+          <a class="toc-link" href="../三维作品架/作品数据立方.html" title="三维作品架">
+            <span class="idx">03</span>
+            <span class="txt">三维作品架</span>
+            <span class="arrow" aria-hidden="true">↗</span>
+          </a>
+        </li>
+        <li>
+          <a class="toc-link" href="../作品总览.html" title="作品总览">
+            <span class="idx">04</span>
+            <span class="txt">作品总览</span>
             <span class="arrow" aria-hidden="true">↗</span>
           </a>
         </li>
@@ -41,12 +62,12 @@
       <p class="toc-hint">更多作品做好后再往这里加。</p>
     </aside>
 
-    <!-- 右侧：先留白，不放「看着能点、其实点不动」的卡片 -->
+    <!-- 右侧：先留白 -->
     <main class="reading">
       <div class="reading-inner">
         <h1 class="section-title">作品总展示</h1>
         <div class="section-rule"></div>
-        <p class="lead">左边是入口，右边这片先空着，等有新东西再往里放。</p>
+        <p class="lead">左边是全部作品入口，右边这片先空着，等有新东西再往里放。</p>
         <div class="canvas-blank" aria-hidden="true"></div>
       </div>
     </main>
